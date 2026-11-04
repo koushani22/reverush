@@ -83,7 +83,7 @@ A single lap can pass through several worlds, which blend into each other as you
 
 **Touch (phones and tablets)**
 
-Touch controls follow the *Need for Speed: No Limits* style: no buttons to hunt for, just the two halves of the screen.
+Touch controls follow the *Need for Speed: No Limits* style: no buttons to hunt for, just the two halves of the screen. Hints and warnings sit in a slim strip at the top of the screen and the status row sits along the bottom edge, so the road and your car stay clear.
 
 | Action | Gesture |
 |---|---|
@@ -92,7 +92,7 @@ Touch controls follow the *Need for Speed: No Limits* style: no buttons to hunt 
 | Switch on the power for the hazard ahead | Swipe up |
 | Drift | Swipe down (keep holding to keep drifting) |
 | Brake | Hold both halves at once |
-| Switch a specific power on or off | Tap its chip above the speed readout |
+| See your charge | The power chips next to the speed readout fill up as you collect rings |
 
 The game always plays in landscape. If your phone is held upright, the game turns itself sideways so you can simply rotate the phone. On Android, when the game is opened from its own web address, it also tries to go full screen and lock landscape.
 

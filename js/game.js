@@ -521,7 +521,7 @@ function tone(f1,f2,dur,type,vol){if(!ac||!soundOn)return;const o=ac.createOscil
 
 /* ---------- Messages ---------- */
 let msgTimer=0,bannerT=0;
-function flash(main,sub,col){const el=$('msg');el.innerHTML=esc(main)+(sub?'<span class="sub" style="color:'+(col||'var(--dim)')+'">'+esc(sub)+'</span>':'');el.style.opacity=1;msgTimer=2.4;}
+function flash(main,sub,col){if(bannerT>0){$('zoneBanner').classList.remove('show');bannerT=0;}const el=$('msg');el.innerHTML=esc(main)+(sub?'<span class="sub" style="color:'+(col||'var(--dim)')+'">'+esc(sub)+'</span>':'');el.style.opacity=1;msgTimer=1.9;}
 function gainFx(t){const b=pwEls[t];b.classList.remove('gain');void b.offsetWidth;b.classList.add('gain');const p=$('gainPop');p.textContent='+34% '+PW[t].name.toLowerCase();p.style.color='var('+PW[t].css+')';p.classList.remove('show');void p.offsetWidth;p.classList.add('show');}
 
 /* ---------- Minimap ---------- */
@@ -629,7 +629,7 @@ function updWrongWay(dt){
   if(Math.abs(st.speed)>2.5&&along<-.25)wwT+=dt;              // driving (or reversing) against the track
   else if(Math.abs(st.speed)<=2.5&&facing<-.5)wwT+=dt*.7;     // parked facing backwards
   else wwT=Math.max(0,wwT-dt*2.5);
-  $('wrongWay').hidden=wwT<.45;
+  $('wrongWay').hidden=wwT<.45;if(wwT>=.45){$('msg').style.opacity=0;msgTimer=0;}
   if(wwT>2.4)turnAround();
 }
 function startRace(li,kind,raceId,lane){
@@ -780,7 +780,7 @@ function worldUpdate(dt,idx,focus){
   if(bloom)bloom.strength=mixN('bloom');
   let dom=0;for(let k=1;k<4;k++)if(WZ[k]>WZ[dom])dom=k;
   if(dom!==lastZone){lastZone=dom;document.documentElement.style.setProperty('--accent',hex(ZONES[dom].rail));
-    if(mode==='race'&&race&&race.state==='run'){$('zoneName').textContent=ZONES[dom].name;$('zoneSub').textContent=ZONES[dom].sub;$('zoneBanner').classList.add('show');bannerT=3;}}
+    if(mode==='race'&&race&&race.state==='run'&&msgTimer<=0){$('zoneName').textContent=ZONES[dom].name;$('zoneSub').textContent=ZONES[dom].sub;$('zoneBanner').classList.add('show');bannerT=2.2;}}
   envDirty-=dt;if(envDirty<=0&&(WZ[dom]<.985||dom!==envZone)){refreshEnv();envDirty=.6;envZone=dom;}
 }
 function updSparkles(dt,focus){
@@ -994,7 +994,7 @@ function perfGuard(dt){perfT+=dt;perfN++;if(perfT<3)return;const fps=perfN/perfT
   if(perfStep===3){renderer.setPixelRatio(1);resize();}}
 function render(){if(composer)composer.render();else renderer.render(scene,camera);}
 const ACT=['activate wings','switch on lava tyres','switch on the boat','switch on ice studs'];
-let hudDmg=-1,promptKey='',tutKey='',tutorT=-1,slowMo=false;
+let hudDmg=-1,tutC='--accent',promptKey='',tutKey='',tutorT=-1,slowMo=false;
 const TUTX=['to spread your wings and fly over the gap. '+(coarse?'Swipe up':'Press F')+' again after you land to fold them.','to switch on lava tyres before you hit the lava.','to switch on the boat before the flood.','to switch on ice studs for grip on the ice.'],TUTC=['gold','orange','blue','ice-blue'];
 function updPrompt(){
   let best=null,bd=1e9,inside=null;
@@ -1016,11 +1016,11 @@ function updPrompt(){
   if(best&&!inside&&race&&race.state==='run'){const t=best.t,p=PW[t];
     if((race.li<=2||!prog.seen[t])&&!st.on[t]){
       if(st.pw[t]>0&&bd<120){tk=t;slow=bd<95;
-        tut='<div class="tw" style="color:var('+p.css+')">'+p.hz+' ahead</div><div class="tk">'+(coarse?'Swipe <b>↑ UP</b>':'Press <kbd>'+(t===0?'F':t+1)+'</kbd>')+'</div><div class="tx">'+TUTX[t]+'</div>';}
-      else if(st.pw[t]<=0&&bd<220){tut='<div class="tw" style="color:var('+p.css+')">'+p.hz+' ahead</div><div class="tx">Drive through the <b style="color:var('+p.css+')">'+TUTC[t]+' rings</b> to charge '+p.name.toLowerCase()+'</div>';}}}
+        tut='<i class="ic"></i><span class="tw">'+p.hz+'</span><span class="tk">'+(coarse?'<kbd>Swipe ↑</kbd>':'<kbd>'+(t===0?'F':t+1)+'</kbd>')+p.name+'</span>';tutC=p.css;}
+      else if(st.pw[t]<=0&&bd<220){tut='<i class="ic"></i><span class="tw">'+p.hz+'</span><span class="tk">Grab the <b>'+TUTC[t]+' rings</b></span>';tutC=p.css;}}}
   if(inside)for(const h of HAZ){const into=((st.idx-h.a)%M+M)%M;if(into>h.b-h.a-3&&into<h.b-h.a&&!prog.seen[h.t]){prog.seen[h.t]=1;saveProg();}}
   tutorT=tk;slowMo=slow;
-  if(tut!==tutKey){tutKey=tut;$('tutor').innerHTML=tut;$('tutor').hidden=!tut;if(tut){$('zoneBanner').classList.remove('show');bannerT=0;}}
+  if(tut!==tutKey){tutKey=tut;$('tutor').innerHTML=tut;$('tutor').hidden=!tut;if(tut)$('tutor').style.setProperty('--c','var('+tutC+')');if(tut){$('zoneBanner').classList.remove('show');bannerT=0;}}
   if(tut)html='';
   const key=html+cls;if(key!==promptKey){promptKey=key;el.innerHTML=html;el.className=cls;el.hidden=!html;}
 }
@@ -1029,7 +1029,7 @@ function hudPowers(){for(let k=0;k<4;k++){const b=pwEls[k];b.querySelector('.m b
   if(coarse)document.querySelectorAll('.tpw').forEach((b,k)=>{b.style.setProperty('--f',st.pw[k]+'%');b.classList.toggle('on',st.on[k]);b.classList.toggle('empty',st.pw[k]<=0);});}
 function frame(t){
   requestAnimationFrame(frame);
-  let dt=Math.min(.05,(t-last)/1000);last=t;perfGuard(dt);if(slowMo&&mode==='race'&&race&&!race.multi&&!paused)dt*=.35;clock+=dt;
+  let dt=Math.min(.05,(t-last)/1000);last=t;perfGuard(dt);if(slowMo&&mode==='race'&&race&&!race.multi&&!paused)dt*=.55;clock+=dt;
   sky.position.copy(camera.position);skyGroup.position.copy(camera.position);
   if(!M){render();return;}
   updAmbient(clock);
@@ -1051,7 +1051,7 @@ function frame(t){
     race.countT-=dt;const n=Math.ceil(race.countT);const el=$('count');el.hidden=false;
     if(race.countT>0){const m=Math.min(3,n);el.innerHTML='<div class="lights">'+[0,1,2].map(i=>'<i class="'+(i<4-m?'on':'')+'"></i>').join('')+'</div>'+m;}
     else{el.innerHTML='<div class="lights go"><i></i><i></i><i></i></div><span class="go">GO</span>';race.state='run';setLamps(0);if(race.gp){const nm=ais.find(a=>a.nem);if(nm)setTimeout(()=>{if(race&&race.state==='run')flash('Your rival: '+nm.name,'Beat them to the line','var(--accent)');},1800);}race.t0=now;race.lapStart=now;gPtr=0;
-      $('zoneName').textContent=ZONES[SEGZ[0]].name;$('zoneSub').textContent='Level '+(race.li+1)+' · '+LEVELS[race.li].name;$('zoneBanner').classList.add('show');bannerT=3;setTimeout(()=>{$('count').hidden=true;},900);}
+      $('zoneName').textContent=ZONES[SEGZ[0]].name;$('zoneSub').textContent='Level '+(race.li+1)+' · '+LEVELS[race.li].name;$('zoneBanner').classList.add('show');bannerT=2.2;setTimeout(()=>{$('count').hidden=true;},900);}
     physics(dt,false);updAI(dt,false);setLamps(race.countT);if(coarse&&$('coach').hidden)$('coach').hidden=false;
   }else if(race.state==='run'){
     const prev=physics(dt,canDrive);if(race.state==='run')lapLogic(prev);if(race.gp&&race.state==='run'){updAI(dt,true);collide();}
@@ -1066,7 +1066,7 @@ function frame(t){
   else if(race.state==='failed'){ghost.visible=false;st.speed*=Math.exp(-dt*3);if(!paused&&now-race.failT>.9)showFail();}
   else{physics(dt,false);ghost.visible=false;slowMo=false;if(race.confetti&&Math.random()<.6)emit(new V3(st.pos.x+(Math.random()-.5)*10,st.pos.y+8,st.pos.z+(Math.random()-.5)*10),3,2);$('wrongWay').hidden=true;if(!$('tutor').hidden){$('tutor').hidden=true;tutKey='';}$('prompt').hidden=true;promptKey='';if(race.gp)updAI(dt,true);}
   if(race.state==='run'&&lampsOn&&now-race.t0>1.2){setLamps(-1);}
-  if(!$('coach').hidden&&race.state==='run'&&(now-race.t0>2||tps.size))$('coach').hidden=true;
+  if(!$('coach').hidden&&race.state!=='count'&&(now-race.t0>.6||tps.size||race.state!=='run'))$('coach').hidden=true;
   placeCar(dt);updTokens(dt);updTrail();updRemotes(dt);updParts(dt);
   {const slip=Math.abs(ang(st.h,st.vh));if(!st.air&&st.speed>14&&(slip>.22||(keys.down&&st.speed>28)))emit(st.pos,0,1);if(hzAt(st.idx)===1&&!st.on[1]&&!st.air)emit(st.pos,1,2);}
   worldUpdate(dt,st.idx,st.pos);updSparkles(dt,st.pos);

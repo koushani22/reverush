@@ -25,7 +25,7 @@
 <div id="speedLines" aria-hidden="true"></div>
 <div id="hud">
   <div class="bar">
-    <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+    <div class="topLeft" style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
       <div class="chip timing">
         <span class="lbl">Lap</span><span class="val big" id="lapNum">1/2</span>
         <span class="lbl">Time</span><span class="val big acc" id="raceTime">0:00.000</span>
@@ -73,9 +73,10 @@
   <button class="tpause" id="pauseT" type="button" aria-label="Pause">II</button>
 </div>
 <div id="coach" hidden>
-  <div class="ch l"><b>◀</b><span>Hold left<br>to steer</span></div>
-  <div class="ch c"><div><b>↑</b> Swipe up · <em>Power</em></div><div><b>↓</b> Swipe down · <em>Drift</em></div><div><b>◀ ▶</b> Hold both · <em>Brake</em></div><small>The car accelerates by itself</small></div>
-  <div class="ch r"><b>▶</b><span>Hold right<br>to steer</span></div>
+  <div class="ch l"><b>◀</b><span>Hold left · steer</span><span class="g"><em>↓</em> Swipe down · drift</span></div>
+  <div class="ch c"></div>
+  <div class="ch r"><b>▶</b><span>Hold right · steer</span><span class="g"><em>↑</em> Swipe up · power</span></div>
+  <div class="coachNote">Hold both sides to brake · the car accelerates by itself</div>
 </div>
 
 <div id="screens">
@@ -103,7 +104,7 @@
       <kbd>Space</kbd><span>Handbrake drift</span>
       <kbd>C · R · P</kbd><span>Camera · reset · pause</span>
     </div>
-    <p class="note touchOnly" id="touchHelp">On a phone the car accelerates by itself. Hold the left or right side of the screen to steer, swipe up to switch on the power for the hazard ahead, swipe down to drift, and hold both sides to brake.</p>
+    <p class="note touchOnly" id="touchHelp">On a phone the car accelerates by itself. Hold the left or right side of the screen to steer, swipe up to switch on the power for the hazard ahead, swipe down to drift, and hold both sides to brake. The power chips at the bottom show your charge.</p>
   </section>
 
   <!-- Multi: name + room -->
