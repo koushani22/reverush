@@ -27,7 +27,13 @@ Reverush is a 3D Formula 1–style racer that runs in the browser, on desktop an
 | Flood | **Boat**: floats deploy and the car skims the water | `3` | You sink and restart the lap |
 | Ice sheet | **Ice studs**: grip on ice | `4` | You slide |
 
-Powers are charged by driving through coloured token rings: gold for wings, orange for lava tyres, blue for the boat and ice-blue for the studs. A switched-on power drains slowly, and faster while it is working.
+Powers are charged by driving through coloured token rings (you have to actually pass through the ring): gold for wings, orange for lava tyres, blue for the boat and ice-blue for the studs. A switched-on power drains slowly, and faster while it is working.
+
+## Racing rules
+
+- **Crash out, try again:** fall into a rift, melt your tyres or sink in a flood and the run ends. A screen tells you what happened and how to beat it next time, with **Try again**, **Levels** and **Main menu**. (In live Room races you're sent back to the start line instead, so friends can keep racing.)
+- **No wrong way:** turn around or reverse against the track and a **WRONG WAY** warning appears. Keep going and the car is put back on the track facing forward after about two seconds.
+- **Finish:** a chequered **FINISH**, a camera sweep around your car and a results screen with **Next level**, **Retry**, **Levels** and **Main menu**.
 
 ## Game modes
 

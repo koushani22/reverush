@@ -56,6 +56,7 @@
 <div id="msg"></div>
 <div id="prompt" hidden></div>
 <div id="tutor" hidden></div>
+<div id="wrongWay" hidden><b>Wrong way</b><span>Turn around</span></div>
 <div id="wipe"></div>
 <div id="gainPop" aria-hidden="true"></div>
 <div id="count" hidden></div>
@@ -132,11 +133,19 @@
     <div class="row" id="resActions"></div>
   </section>
 
+  <!-- Failed -->
+  <section class="screen card" id="scrFail" data-screen hidden>
+    <div><div class="eyebrow" id="failEyebrow">Level 1</div><h2 id="failTitle" class="failTitle">Lost to the rift</h2><p class="note" id="failNote" style="margin-top:8px"></p></div>
+    <div class="failTip" id="failTip"></div>
+    <button class="primary" type="button" id="failRetry">Try again</button>
+    <div class="row"><button class="ghostbtn" type="button" id="failLevels">Levels</button><button class="ghostbtn" type="button" id="failMenu">Main menu</button></div>
+  </section>
+
   <!-- Pause -->
   <section class="screen card" id="scrPause" data-screen hidden>
     <div><div class="eyebrow">Paused</div><h2 id="pauseTitle">Level 1</h2></div>
     <button class="primary" type="button" id="resumeBtn">Resume</button>
-    <div class="row"><button class="ghostbtn" type="button" id="restartBtn">Restart</button><button class="ghostbtn" type="button" id="quitBtn">Quit to menu</button></div>
+    <div class="row"><button class="ghostbtn" type="button" id="restartBtn">Restart</button><button class="ghostbtn" type="button" id="quitBtn">Levels</button><button class="ghostbtn" type="button" id="menuBtn">Main menu</button></div>
   </section>
 </div>
 <div id="loading" hidden>Building track…</div>
