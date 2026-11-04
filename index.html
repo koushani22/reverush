@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Reverush</title>
+<meta name="description" content="The world is breaking. The race is on. An F1 racer across broken magical worlds: transform your car at the perfect moment to fly over rifts, charge through lava, skim floods and grip the ice.">
+<meta name="theme-color" content="#120b16">
+<meta property="og:title" content="Reverush">
+<meta property="og:description" content="The world is breaking. The race is on. An F1 racer across broken magical worlds: transform your car at the perfect moment to fly over rifts, charge through lava, skim floods and grip the ice.">
+<meta property="og:image" content="assets/screenshots/title.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="hud">
+  <div class="bar">
+    <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+      <div class="chip timing">
+        <span class="lbl">Lap</span><span class="val big" id="lapNum">1/2</span>
+        <span class="lbl">Time</span><span class="val big acc" id="raceTime">0:00.000</span>
+        <span class="lbl" id="refLbl">Best</span><span class="val" id="refTime">—</span>
+      </div>
+      <div class="chip" id="posChip" hidden><div class="lbl">Pos</div><div id="posVal">1<small>/1</small></div><div class="lbl" id="posGap" style="margin-top:2px"></div><div id="board"></div></div>
+    </div>
+    <div class="chip" id="mapWrap"><canvas id="minimap" aria-label="Track map"></canvas></div>
+  </div>
+  <div></div>
+  <div class="bar bottom">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="chip" id="powers"></div>
+      <div class="tools">
+        <button class="btn" id="camBtn" type="button">Camera<small id="camName">Chase</small></button>
+        <button class="btn" id="sndBtn" type="button">Sound<small id="sndName">Off</small></button>
+        <button class="btn" id="pauseBtn" type="button">Pause</button>
+      </div>
+    </div>
+    <div class="chip" id="speedo">
+      <div class="lbl">km/h</div><div id="speed">0</div>
+      <div id="rev"><div id="revFill"></div></div>
+      <div class="speedRow"><span class="lbl">Gear</span><span id="gear">N</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="zoneBanner" aria-live="polite"><div class="zn" id="zoneName"></div><div class="zs" id="zoneSub"></div></div>
+<div id="msg"></div>
+<div id="prompt" hidden></div>
+<div id="tutor" hidden></div>
+<div id="wipe"></div>
+<div id="gainPop" aria-hidden="true"></div>
+<div id="count" hidden></div>
+
+<div id="touch">
+  <div class="grp">
+    <button class="tbtn steer" data-k="left" type="button" aria-label="Steer left">◀</button>
+    <button class="tbtn steer" data-k="right" type="button" aria-label="Steer right">▶</button>
+  </div>
+  <div class="grp rgt">
+    <div class="tpows">
+      <button class="tpw" data-p="0" type="button" style="--c:var(--wings)" aria-label="Wings on or off"><i></i><span>Wings</span></button>
+      <button class="tpw" data-p="1" type="button" style="--c:var(--lava)" aria-label="Lava tyres on or off"><i></i><span>Lava</span></button>
+      <button class="tpw" data-p="2" type="button" style="--c:var(--boat)" aria-label="Boat on or off"><i></i><span>Boat</span></button>
+      <button class="tpw" data-p="3" type="button" style="--c:var(--ice)" aria-label="Ice studs on or off"><i></i><span>Ice</span></button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-end">
+      <button class="tbtn" id="pauseT" type="button" aria-label="Pause" style="width:44px;height:44px">II</button>
+      <button class="tbtn" data-k="hb" type="button" aria-label="Handbrake" style="width:52px;height:52px">HB</button>
+      <button class="tbtn gas" data-k="down" type="button" aria-label="Brake">BRAKE</button>
+    </div>
+  </div>
+</div>
+
+<div id="screens">
+  <!-- Title -->
+  <section class="screen" id="scrTitle" data-screen>
+    <h1 class="logo"><img id="logoImg" src="assets/logo.webp" alt="Reverush" width="1100" height="170"></h1>
+    <div class="intro"><p class="tagline">The world is breaking. The race is on.</p>
+    <p class="lede">Push full throttle through sunset dunes, turquoise lagoons, enchanted forests and floating crystal peaks. Collect power tokens and transform your car at the perfect moment—unfold wings over broken roads, skim across floods, charge through lava and grip the ice. Chase medal times or race your friends through worlds where the next corner changes everything.</p></div>
+    <p class="rotateHint">Turn your phone sideways for the best view</p>
+    <div class="modes">
+      <button class="mode" type="button" id="goSingle"><b>Single player</b><span>Time trial on 8 levels. Beat the medal times.</span><i>→</i></button>
+      <button class="mode" type="button" id="goGP"><b>Multiplayer</b><span>Race 7 AI drivers. Level 1 is gentle, level 8 is brutal.</span><i>→</i></button>
+      <button class="mode" type="button" id="goMulti"><b>Room</b><span>Live online room. Share a code and race your friends.</span><i>→</i></button>
+    </div>
+  </section>
+
+  <!-- Single: level select -->
+  <section class="screen card" id="scrLevels" data-screen hidden>
+    <button class="back" type="button" data-back="scrTitle">← Back</button>
+    <div><div class="eyebrow" id="lvlEyebrow">Single player</div><h2>Choose a level</h2><p class="note" id="lvlNote" style="margin-top:6px"></p></div>
+    <div class="levels" id="levelGrid"></div>
+    <div class="keys deskOnly">
+      <kbd>W A S D</kbd><span>Drive (or arrow keys)</span>
+      <kbd>F</kbd><span>Wings on / off — fly over rifts</span>
+      <kbd>2 · 3 · 4</kbd><span>Lava tyres · Boat · Ice studs on / off</span>
+      <kbd>Space</kbd><span>Handbrake drift</span>
+      <kbd>C · R · P</kbd><span>Camera · reset · pause</span>
+    </div>
+    <p class="note touchOnly" id="touchHelp">On a phone the car accelerates by itself. Left thumb steers. Right thumb brakes and taps the power buttons (Wings, Lava, Boat, Ice) to switch them on and off.</p>
+  </section>
+
+  <!-- Multi: name + room -->
+  <section class="screen card" id="scrMulti" data-screen hidden>
+    <button class="back" type="button" data-back="scrTitle">← Back</button>
+    <div><div class="eyebrow">Room</div><h2>Live online race</h2></div>
+    <label class="field"><span class="lbl">Your name</span><input id="nameIn" maxlength="14" autocomplete="off" placeholder="Driver"></label>
+    <button class="primary" type="button" id="createRoom">Create a room</button>
+    <div class="field"><span class="lbl">Or join with a code</span>
+      <div class="row"><input id="codeIn" maxlength="4" autocomplete="off" placeholder="ABCD" style="text-transform:uppercase;letter-spacing:.3em"><button class="ghostbtn" type="button" id="joinRoom">Join</button></div>
+    </div>
+    <p class="note" id="multiNote">Friends need access to this page (share it from the Share menu) and must be signed in to claude.ai.</p>
+  </section>
+
+  <!-- Lobby -->
+  <section class="screen card" id="scrLobby" data-screen hidden>
+    <button class="back" type="button" id="leaveLobby">← Leave room</button>
+    <div><div class="eyebrow">Room code</div><div class="code" id="roomCode">----</div></div>
+    <div class="players" id="playerList"></div>
+    <div class="field"><span class="lbl" id="pickLbl">Level</span><div class="lvlpick" id="lvlPick"></div></div>
+    <button class="primary" type="button" id="startRace">Start race</button>
+    <p class="note" id="lobbyNote">Waiting for the host to start.</p>
+  </section>
+
+  <!-- Results -->
+  <section class="screen card" id="scrResults" data-screen hidden>
+    <div><div class="eyebrow" id="resEyebrow">Level 1</div><h2 id="resTitle">Finished</h2></div>
+    <div id="resBody"></div>
+    <div class="row" id="resActions"></div>
+  </section>
+
+  <!-- Pause -->
+  <section class="screen card" id="scrPause" data-screen hidden>
+    <div><div class="eyebrow">Paused</div><h2 id="pauseTitle">Level 1</h2></div>
+    <button class="primary" type="button" id="resumeBtn">Resume</button>
+    <div class="row"><button class="ghostbtn" type="button" id="restartBtn">Restart</button><button class="ghostbtn" type="button" id="quitBtn">Quit to menu</button></div>
+  </section>
+</div>
+<div id="loading" hidden>Building track…</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
