@@ -105,6 +105,15 @@ body:not(.racing) #wrongWay,body.paused #wrongWay{display:none}
 .failTip .dot{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
 #count .fin{font-size:min(14vw,92px);letter-spacing:.12em;background:repeating-conic-gradient(#fff8ee 0 25%,#1a0d12 0 50%) 0 0/22px 22px;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:2px #fff8ee}
 @media (prefers-reduced-motion:reduce){#wrongWay{animation:none}}
+#speedLines{position:fixed;inset:-25%;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,0) 0deg 2.6deg,rgba(255,255,255,.5) 2.6deg 2.9deg);
+  -webkit-mask:radial-gradient(circle at 50% 50%,transparent 0 30%,#000 62%);mask:radial-gradient(circle at 50% 50%,transparent 0 30%,#000 62%)}
+body:not(.racing) #speedLines,body.paused #speedLines{display:none}
+.dmgRow{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:6px}
+.dmgBar{width:64px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}.dmgBar b{display:block;height:100%;width:0;background:var(--good);transition:width .2s}
+@media (pointer:coarse){#speedo .dmgRow{display:flex;margin:0;order:3}#speedo .dmgRow .lbl{display:none}.dmgBar{width:36px}}
+@media (prefers-reduced-motion:reduce){#speedLines{display:none}}
+body.celebrating #hud,body.celebrating #zoneBanner,body.celebrating #touchHud,body.celebrating #prompt{display:none!important}
 #wipe{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(255,90,40,.0),rgba(255,60,30,.55));opacity:0}
 #wipe.on{animation:wipe .9s ease-out}@keyframes wipe{0%{opacity:1}100%{opacity:0}}
 body:not(.racing) #prompt{display:none}

@@ -33,6 +33,10 @@ Powers are charged by driving through coloured token rings (you have to actually
 
 - **Crash out, try again:** fall into a rift, melt your tyres or sink in a flood and the run ends. A screen tells you what happened and how to beat it next time, with **Try again**, **Levels** and **Main menu**. (In live Room races you're sent back to the start line instead, so friends can keep racing.)
 - **No wrong way:** turn around or reverse against the track and a **WRONG WAY** warning appears. Keep going and the car is put back on the track facing forward after about two seconds.
+- **Rivals that race back:** every Multiplayer level has a named rival (★) who is a little faster and sharper than the rest. AI drivers defend their line when you're close behind, fight back for a few seconds after you pass, and the pack stays close so races don't spread out.
+- **Damage:** hitting walls dents the car. The front wing breaks off, then the rear wing, the car smokes, loses top speed and pulls to one side. A damage bar sits under the speedometer.
+- **Podium finish:** finish in the top 3 in Multiplayer and the top three cars line up on a gold, silver and bronze podium with confetti before the results. Medal finishes in Single player get confetti too.
+- **Sense of speed and sound:** light posts arching over the road, red-and-white chevrons on the outside of corners, and speed streaks at high speed and on boost. Sound is generated in code (no audio files): engine with gear shifts, wind, tyre squeal, impacts and a crowd at the start line.
 - **Finish:** a chequered **FINISH**, a camera sweep around your car and a results screen with **Next level**, **Retry**, **Levels** and **Main menu**.
 
 ## Game modes
@@ -55,6 +59,10 @@ A single lap can pass through several worlds, which blend into each other as you
 | Racing 7 AI drivers | Tutorial prompts |
 |---|---|
 | ![Grid start](assets/screenshots/race-grid.jpg) | ![Lava prompt](assets/screenshots/tutorial-prompt.jpg) |
+
+| Podium finish | Damage |
+|---|---|
+| ![Podium](assets/screenshots/podium.jpg) | ![Damage](assets/screenshots/damage.jpg) |
 
 | Phone controls | Racing on a phone |
 |---|---|
