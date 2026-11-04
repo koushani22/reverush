@@ -50,9 +50,9 @@ A single lap can pass through several worlds, which blend into each other as you
 |---|---|
 | ![Grid start](assets/screenshots/race-grid.jpg) | ![Lava prompt](assets/screenshots/tutorial-prompt.jpg) |
 
-| Phone (landscape) | Phone (portrait) |
+| Phone controls | Racing on a phone |
 |---|---|
-| ![Phone landscape](assets/screenshots/phone-landscape.jpg) | ![Phone portrait](assets/screenshots/phone-portrait.jpg) |
+| ![Phone controls](assets/screenshots/phone-controls.jpg) | ![Phone race](assets/screenshots/phone-landscape.jpg) |
 
 ## Controls
 
@@ -69,7 +69,18 @@ A single lap can pass through several worlds, which blend into each other as you
 
 **Touch (phones and tablets)**
 
-The car accelerates by itself. Your left thumb steers with the big arrow buttons. Your right thumb brakes and taps the **Wings, Lava, Boat and Ice** buttons, which fill up as you collect tokens. Landscape gives the best view.
+Touch controls follow the *Need for Speed: No Limits* style: no buttons to hunt for, just the two halves of the screen.
+
+| Action | Gesture |
+|---|---|
+| Accelerate | Automatic |
+| Steer | Hold the left or right half of the screen |
+| Switch on the power for the hazard ahead | Swipe up |
+| Drift | Swipe down (keep holding to keep drifting) |
+| Brake | Hold both halves at once |
+| Switch a specific power on or off | Tap its chip above the speed readout |
+
+The game always plays in landscape. If your phone is held upright, the game turns itself sideways so you can simply rotate the phone. On Android, when the game is opened from its own web address, it also tries to go full screen and lock landscape.
 
 ## Publish on GitHub Pages
 

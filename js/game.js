@@ -454,19 +454,38 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{if(keyMap[e.code])keys[keyMap[e.code]]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
 document.querySelectorAll('.tpw').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();toggle(+b.dataset.p);}));
-document.querySelectorAll('.tbtn[data-k]').forEach(b=>{const k=b.dataset.k;
-  const on=e=>{e.preventDefault();keys[k]=true;b.classList.add('on');};const off=()=>{keys[k]=false;b.classList.remove('on');};
-  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off);});
+// Touch: hold left / right half to steer, swipe up = power for the hazard ahead, swipe down = drift, hold both = brake
+const tps=new Map();let hbUntil=0;
+const loc=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};
+function touchKeys(){let L=false,R2=false,dr=false;for(const p of tps.values()){if(p.g==='up')continue;if(p.side<0)L=true;else R2=true;if(p.g==='down')dr=true;}
+  const both=L&&R2;keys.down=both;keys.left=L&&!both;keys.right=R2&&!both;keys.hb=!both&&(dr||performance.now()<hbUntil);
+  $('touchZone').querySelector('.tzL').classList.toggle('on',L);$('touchZone').querySelector('.tzR').classList.toggle('on',R2);}
+const tz=$('touchZone');
+tz.addEventListener('pointerdown',e=>{e.preventDefault();const q=loc(e);tps.set(e.pointerId,{x0:q.x,y0:q.y,t0:performance.now(),side:q.x<AW/2?-1:1,g:null});try{tz.setPointerCapture(e.pointerId);}catch(_){}touchKeys();});
+tz.addEventListener('pointermove',e=>{const p=tps.get(e.pointerId);if(!p||p.g)return;const q=loc(e),dx=q.x-p.x0,dy=q.y-p.y0;
+  if(Math.abs(dy)>38&&Math.abs(dy)>Math.abs(dx)*1.15&&performance.now()-p.t0<600){p.g=dy<0?'up':'down';if(p.g==='up')smartPower();else{hbUntil=performance.now()+450;tone(180,120,.15,'square',.03);}touchKeys();}});
+const tend=e=>{const p=tps.get(e.pointerId);if(p&&p.g==='down')hbUntil=performance.now()+300;tps.delete(e.pointerId);touchKeys();};
+tz.addEventListener('pointerup',tend);tz.addEventListener('pointercancel',tend);
+setInterval(()=>{if(coarse&&mode==='race')touchKeys();},100);
+function targetPower(){let inside=-1,next=-1,bd=1e9;for(const h of HAZ){const len=h.b-h.a,into=((st.idx-h.a)%M+M)%M;if(into<len)inside=h.t;const d=((h.a-st.idx)%M+M)%M;if(d<bd&&d<420&&into>=len){bd=d;next=h.t;}}return inside>=0?inside:next;}
+function smartPower(){if(mode!=='race'||!race||race.state!=='run')return;const t=targetPower();
+  if(st.on[0]&&st.air&&t!==0){toggle(0);return;}
+  if(t<0){const on=st.on.findIndex(x=>x);if(on>=0){toggle(on);return;}if(st.pw[0]>0){toggle(0);return;}flash('Nothing to power up','Swipe up when a hazard is ahead','');return;}
+  toggle(t);}
+// try real fullscreen + landscape lock on phones (works on Android when hosted on its own site)
+let fsTried=false;function tryLandscape(){if(!coarse||fsTried)return;fsTried=true;try{const el=document.documentElement;const p=el.requestFullscreen?el.requestFullscreen({navigationUI:'hide'}):null;
+  if(p&&p.then)p.then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{});}catch(_){}}).catch(()=>{});}catch(_){}}
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('pointerdown',tryLandscape));
 function resetToTrack(){if(hzAt(st.idx)===0||st.air){fell();return;}const i=st.idx;st.pos.copy(P(i,0,0));st.h=st.vh=head[i];st.speed=0;flash('Back on track','');}
 function cycleCam(){camMode=(camMode+1)%CAMS.length;$('camName').textContent=CAMS[camMode];}
 $('camBtn').onclick=cycleCam;$('pauseBtn').onclick=togglePause;$('pauseT').onclick=togglePause;
-function togglePause(){if(mode!=='race')return;paused=!paused;document.body.classList.toggle('paused',paused);
+function togglePause(){if(mode!=='race')return;paused=!paused;tps.clear();keys.left=keys.right=keys.down=keys.hb=false;document.body.classList.toggle('paused',paused);
   if(paused){$('pauseTitle').textContent=(race.multi?'Room '+roomCode+' · ':'')+'Level '+(race.li+1)+' · '+LEVELS[race.li].name;$('restartBtn').hidden=race.multi;show('scrPause');$('resumeBtn').focus();engine(false);}
   else{engine(true);}}
 $('resumeBtn').onclick=togglePause;
 $('restartBtn').onclick=()=>{paused=false;document.body.classList.remove('paused');startRace(race.li,race.kind);};
 $('quitBtn').onclick=()=>quitToMenu();
-function quitToMenu(){const wasMulti=race&&race.multi;if(race)lvlMode=race.kind==='gp'?'gp':'single';paused=false;document.body.classList.remove('paused','racing');mode='menu';race=null;engine(false);clearRemotes();clearAI();
+function quitToMenu(){$('coach').hidden=true;tps.clear();const wasMulti=race&&race.multi;if(race)lvlMode=race.kind==='gp'?'gp':'single';paused=false;document.body.classList.remove('paused','racing');mode='menu';race=null;engine(false);clearRemotes();clearAI();
   if(wasMulti){setP({s:'lobby',rr:null,f:null});show('scrLobby');}else show('scrLevels');}
 
 /* ---------- Audio ---------- */
@@ -551,7 +570,7 @@ function physics(dt,canDrive){
   return prev;
 }
 function wipeout(why){const w=$('wipe');w.classList.remove('on');void w.offsetWidth;w.classList.add('on');placeOnGrid(race&&race.multi?race.lane:0);if(race)race.dist=race.lapsDone*M;st.shake=.8;flash(why,'Back to the start line','var(--hot)');tone(300,60,.8,'sawtooth',.07);}
-const AK={up:true,down:false,left:false,right:false,hb:false};function autoK(){AK.up=!keys.down;AK.down=keys.down;AK.left=keys.left;AK.right=keys.right;AK.hb=keys.hb;return AK;}
+const AK={up:true,down:false,left:false,right:false,hb:false};/* auto-throttle on touch */function autoK(){AK.up=!keys.down;AK.down=keys.down;AK.left=keys.left;AK.right=keys.right;AK.hb=keys.hb;return AK;}
 function fell(){placeOnGrid(race&&race.multi?race.lane:0);if(race)race.dist=race.lapsDone*M;st.shake=.7;if(race)flash('Lost to the rift','Back to the start line','var(--hot)');tone(400,90,.7,'sawtooth',.06);}
 
 /* ---------- Race flow ---------- */
@@ -896,7 +915,7 @@ function perfGuard(dt){perfT+=dt;perfN++;if(perfT<3)return;const fps=perfN/perfT
 function render(){if(composer)composer.render();else renderer.render(scene,camera);}
 const ACT=['activate wings','switch on lava tyres','switch on the boat','switch on ice studs'];
 let promptKey='',tutKey='',tutorT=-1,slowMo=false;
-const TUTX=['to spread your wings and fly over the gap. Press again after you land to fold them.','to switch on lava tyres before you hit the lava.','to switch on the boat before the flood.','to switch on ice studs for grip on the ice.'],TUTC=['gold','orange','blue','ice-blue'];
+const TUTX=['to spread your wings and fly over the gap. '+(coarse?'Swipe up':'Press F')+' again after you land to fold them.','to switch on lava tyres before you hit the lava.','to switch on the boat before the flood.','to switch on ice studs for grip on the ice.'],TUTC=['gold','orange','blue','ice-blue'];
 function updPrompt(){
   let best=null,bd=1e9,inside=null;
   for(const h of HAZ){const d=((h.a-st.idx)%M+M)%M,len=h.b-h.a;if(d<=M-len-1&&d<bd&&d<230){bd=d;best=h;}const into=((st.idx-h.a)%M+M)%M;if(into<len)inside=h;}
@@ -917,7 +936,7 @@ function updPrompt(){
   if(best&&!inside&&race&&race.state==='run'){const t=best.t,p=PW[t];
     if((race.li<=2||!prog.seen[t])&&!st.on[t]){
       if(st.pw[t]>0&&bd<120){tk=t;slow=bd<95;
-        tut='<div class="tw" style="color:var('+p.css+')">'+p.hz+' ahead</div><div class="tk">'+(coarse?'Tap <b>'+['WINGS','LAVA','BOAT','ICE'][t]+'</b>':'Press <kbd>'+(t===0?'F':t+1)+'</kbd>')+'</div><div class="tx">'+TUTX[t]+'</div>';}
+        tut='<div class="tw" style="color:var('+p.css+')">'+p.hz+' ahead</div><div class="tk">'+(coarse?'Swipe <b>↑ UP</b>':'Press <kbd>'+(t===0?'F':t+1)+'</kbd>')+'</div><div class="tx">'+TUTX[t]+'</div>';}
       else if(st.pw[t]<=0&&bd<220){tut='<div class="tw" style="color:var('+p.css+')">'+p.hz+' ahead</div><div class="tx">Drive through the <b style="color:var('+p.css+')">'+TUTC[t]+' rings</b> to charge '+p.name.toLowerCase()+'</div>';}}}
   if(inside)for(const h of HAZ){const into=((st.idx-h.a)%M+M)%M;if(into>h.b-h.a-3&&into<h.b-h.a&&!prog.seen[h.t]){prog.seen[h.t]=1;saveProg();}}
   tutorT=tk;slowMo=slow;
@@ -925,7 +944,7 @@ function updPrompt(){
   if(tut)html='';
   const key=html+cls;if(key!==promptKey){promptKey=key;el.innerHTML=html;el.className=cls;el.hidden=!html;}
 }
-const keycap=t=>coarse?'<kbd>Tap '+['WINGS','LAVA','BOAT','ICE'][t]+'</kbd>':'<kbd>'+(t===0?'F':t+1)+'</kbd>';
+const keycap=t=>coarse?'<kbd>Swipe ↑</kbd>':'<kbd>'+(t===0?'F':t+1)+'</kbd>';
 function hudPowers(){for(let k=0;k<4;k++){const b=pwEls[k];b.querySelector('.m b').style.width=st.pw[k]+'%';b.lastElementChild.textContent=st.on[k]?'ON':Math.round(st.pw[k])+'%';b.classList.toggle('has',st.pw[k]>0);b.classList.toggle('live',st.on[k]);}
   if(coarse)document.querySelectorAll('.tpw').forEach((b,k)=>{b.style.setProperty('--f',st.pw[k]+'%');b.classList.toggle('on',st.on[k]);b.classList.toggle('empty',st.pw[k]<=0);});}
 function frame(t){
@@ -953,7 +972,7 @@ function frame(t){
     if(race.countT>0){const m=Math.min(3,n);el.innerHTML='<div class="lights">'+[0,1,2].map(i=>'<i class="'+(i<4-m?'on':'')+'"></i>').join('')+'</div>'+m;}
     else{el.innerHTML='<div class="lights go"><i></i><i></i><i></i></div><span class="go">GO</span>';race.state='run';setLamps(0);race.t0=now;race.lapStart=now;gPtr=0;
       $('zoneName').textContent=ZONES[SEGZ[0]].name;$('zoneSub').textContent='Level '+(race.li+1)+' · '+LEVELS[race.li].name;$('zoneBanner').classList.add('show');bannerT=3;setTimeout(()=>{$('count').hidden=true;},900);}
-    physics(dt,false);updAI(dt,false);setLamps(race.countT);
+    physics(dt,false);updAI(dt,false);setLamps(race.countT);if(coarse&&$('coach').hidden)$('coach').hidden=false;
   }else if(race.state==='run'){
     const prev=physics(dt,canDrive);lapLogic(prev);if(race.gp){updAI(dt,true);collide();}
     if(race.state==='run'){
@@ -964,6 +983,7 @@ function frame(t){
     }
   }else{physics(dt,false);ghost.visible=false;slowMo=false;if(!$('tutor').hidden){$('tutor').hidden=true;tutKey='';}if(race.gp)updAI(dt,true);}
   if(race.state==='run'&&lampsOn&&now-race.t0>1.2){setLamps(-1);}
+  if(!$('coach').hidden&&race.state==='run'&&(now-race.t0>2||tps.size))$('coach').hidden=true;
   placeCar(dt);updTokens(dt);updTrail();updRemotes(dt);updParts(dt);
   {const slip=Math.abs(ang(st.h,st.vh));if(!st.air&&st.speed>14&&(slip>.22||(keys.down&&st.speed>28)))emit(st.pos,0,1);if(hzAt(st.idx)===1&&!st.on[1]&&!st.air)emit(st.pos,1,2);}
   worldUpdate(dt,st.idx,st.pos);updSparkles(dt,st.pos);
@@ -990,8 +1010,13 @@ function frame(t){
   if(bannerT>0){bannerT-=dt;if(bannerT<=0)$('zoneBanner').classList.remove('show');}
   render();drawMap();
 }
-function resize(){const w=window.innerWidth,h=window.innerHeight;renderer.setSize(w,h,false);if(composer)composer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();sizeMap();}
-window.addEventListener('resize',resize);
+let ROT=false,AW=innerWidth,AH=innerHeight;
+function layout(){const vw=innerWidth,vh=innerHeight;ROT=coarse&&vh>vw;AW=ROT?vh:vw;AH=ROT?vw:vh;const app=$('app');
+  document.body.classList.toggle('rot',ROT);
+  if(ROT){app.style.width=AW+'px';app.style.height=AH+'px';app.style.transform='translate('+vw+'px,0) rotate(90deg)';}else{app.style.width=app.style.height=app.style.transform='';}
+  document.documentElement.style.setProperty('--appw',AW+'px');document.body.classList.toggle('narrow',AW<=560);document.body.classList.toggle('short',AH<=520);}
+function resize(){layout();const w=AW,h=AH;renderer.setSize(w,h,false);if(composer)composer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();sizeMap();}
+window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,250));
 // boot: the title fly-through uses the four-world level
 buildLevel(4);placeOnGrid(0);show('scrTitle');resize();worldUpdate(0,0,st.pos);refreshEnv();
 requestAnimationFrame(frame);
